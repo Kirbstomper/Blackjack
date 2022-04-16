@@ -1,10 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
-public class Player : MonoBehaviour
+namespace Blackjack
 {
+
+public class Player
+{
+
+    
+    public List<Card> Hand = new List<Card>();
+
     // Start is called before the first frame update
+
     void Start()
     {
         
@@ -15,4 +24,5 @@ public class Player : MonoBehaviour
     {
         
     }
+}
 }
