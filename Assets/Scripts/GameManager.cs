@@ -152,7 +152,7 @@ namespace Blackjack
             //After everything is added, we then can add the aces
             while (aceCount > 0)
             {
-                if (aceCount == 1 && (value + 11 >= 21))
+                if (aceCount == 1 && (value + 11 <= 21))
                 {
                     //If last ace and safe to add
                     value += 11;
