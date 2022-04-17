@@ -34,6 +34,7 @@ namespace Blackjack
         public TextMeshProUGUI scoreText;
         public TextMeshProUGUI gameStatus;
         public TextMeshProUGUI playerBetText;
+        public TextMeshProUGUI playerChipsText;
 
         List<string> suits = new List<string> { "Tiles", "Clovers", "Pikes", "Hearts" };
         List<string> faces = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "King", "Queen", "Jack" };
@@ -230,7 +231,7 @@ namespace Blackjack
 
 
         //Handles increasing or decreasing bet 
-        public void changeBet(int amt)
+        public void ChangeBet(int amt)
         {
             if (!(playerBet + amt > playerChips) && !(playerBet + amt < 0))
             {
@@ -262,7 +263,9 @@ namespace Blackjack
         // Update is called once per frame
         void Update()
         {
-            
+            playerBetText.text = string.Format("{0}", playerBet);
+            playerChipsText.text = string.Format("{0}", playerChips);
+
         }
     }
 }

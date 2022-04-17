@@ -50,6 +50,18 @@ namespace Blackjack
         }
 
 
+        public void PressRaise()
+        {
+            if(gameManager.IsGameState(GameManager.GameState.BETTING))
+                gameManager.ChangeBet(10);
+        }
+
+        public void PressLower()
+        {
+           if(gameManager.IsGameState(GameManager.GameState.BETTING))
+                gameManager.ChangeBet(-10); 
+        }
+
         void getControllerInput()
         {
             if (Gamepad.current.buttonSouth.wasPressedThisFrame)
@@ -70,7 +82,7 @@ namespace Blackjack
         // Update is called once per frame
         void Update()
         {
-            getControllerInput();
+            //getControllerInput();
         }
 
     }
