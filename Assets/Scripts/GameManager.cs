@@ -18,18 +18,23 @@ namespace Blackjack
 
         public Transform dealerFaceDown;
         public List<Card> PlayerHand = new List<Card>();
+        int playerChips = 500;
+        int playerBet = 0;
 
         public List<Card> DealerHand = new List<Card>();
+
+
+        public enum GameState { PLAYERTURN, BETTING, BUST, BLACKJACK, END }
+
+        GameState CurrentState;
 
 
 
         //UI elements
         public TextMeshProUGUI scoreText;
-
         public TextMeshProUGUI gameStatus;
+        public TextMeshProUGUI playerBetText;
 
-        public Button stayButton;
-        public Button hitButton;
         List<string> suits = new List<string> { "Tiles", "Clovers", "Pikes", "Hearts" };
         List<string> faces = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "King", "Queen", "Jack" };
 
@@ -56,14 +61,12 @@ namespace Blackjack
             if (score == 21)
             {
                 gameStatus.text = "BLACKJACK :D";
-                hitButton.interactable = false;
+                CurrentState = GameState.BLACKJACK;
             }
             if (score > 21)
             {
                 gameStatus.text = "BUST";
-                stayButton.interactable = false;
-                hitButton.interactable = false;
-
+                CurrentState = GameState.BUST;
             }
 
         }
@@ -73,9 +76,9 @@ namespace Blackjack
         **/
         public void Stay()
         {
+            CurrentState = GameState.END;
             DealerHand[0].UpdateCardSprite();
-            stayButton.interactable = false;
-            hitButton.interactable = false;
+
 
             var dealerVal = GetHandValue(DealerHand);
             var playerVal = GetHandValue(PlayerHand);
@@ -169,6 +172,8 @@ namespace Blackjack
         }
 
 
+
+
         public void SetupNewGame()
         {
             //Clear player hand
@@ -188,16 +193,10 @@ namespace Blackjack
             //Clear UI elements
             scoreText.text = "";
             gameStatus.text = "";
-            hitButton.interactable = true;
-            stayButton.interactable = true;
 
-            //Deal 2 cards to the dealer
-            DealCardDealer(false);
-            DealCardDealer();
-
-            //Deal 2 Cards to the Player
-            DealCardPlayer();
-            DealCardPlayer();
+            //Prompt player to set initial bet
+            gameStatus.text = "Please Place your bet!";
+            CurrentState = GameState.BETTING;
 
 
             //Populate players list with connected players
@@ -205,6 +204,7 @@ namespace Blackjack
 
             //Start with player furthest right,
         }
+
 
 
 
@@ -226,10 +226,43 @@ namespace Blackjack
                 DealerHand[DealerHand.Count - 1].UpdateCardSprite();
             }
         }
+
+
+
+        //Handles increasing or decreasing bet 
+        public void changeBet(int amt)
+        {
+            if (!(playerBet + amt > playerChips) && !(playerBet + amt < 0))
+            {
+                playerBet += amt;
+                playerChips -= amt;
+            }
+        }
+
+
+
+        public bool IsGameState(GameState state)
+        {
+            return (CurrentState == state);
+        }
+        public void PlaceBet()
+        {
+            //Deal cards after bet is placed
+            gameStatus.text = "";
+            CurrentState = GameState.PLAYERTURN;
+            //Deal 2 cards to the dealer
+            DealCardDealer(false);
+            DealCardDealer();
+
+            //Deal 2 Cards to the Player
+            DealCardPlayer();
+            DealCardPlayer();
+
+        }
         // Update is called once per frame
         void Update()
         {
-
+            
         }
     }
 }
