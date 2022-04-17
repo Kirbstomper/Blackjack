@@ -39,97 +39,6 @@ namespace Blackjack
         List<string> suits = new List<string> { "Tiles", "Clovers", "Pikes", "Hearts" };
         List<string> faces = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "King", "Queen", "Jack" };
 
-        /**
-            Deals a card to the current player, then moves turn to next
-        **/
-        public void DealCardPlayer()
-        {
-            //Hit the player with a new card
-
-            var x = prefabCard.transform.position.x;
-            var y = prefabCard.transform.position.y;
-
-            PlayerHand.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * PlayerHand.Count, y, -1 * PlayerHand.Count), Quaternion.identity));
-            PlayerHand[PlayerHand.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
-            PlayerHand[PlayerHand.Count - 1].Face = faces[Random.Range(0, faces.Count)];
-            PlayerHand[PlayerHand.Count - 1].UpdateCardSprite();
-
-            var score = GetHandValue(PlayerHand);
-            scoreText.text = string.Format("PlayerHand Value:{0} ", score);
-
-
-
-            if (score == 21)
-            {
-                gameStatus.text = "BLACKJACK :D";
-                CurrentState = GameState.BLACKJACK;
-            }
-            if (score > 21)
-            {
-                gameStatus.text = "BUST";
-                CurrentState = GameState.END;
-                playerBet = 0;
-            }
-
-        }
-
-        /***
-            Stop getting new cards
-        **/
-        public void Stay()
-        {
-            CurrentState = GameState.END;
-            DealerHand[0].UpdateCardSprite();
-
-
-            var dealerVal = GetHandValue(DealerHand);
-            var playerVal = GetHandValue(PlayerHand);
-
-            while (dealerVal < 17)
-            {
-                //Dealer must draw another card
-                DealCardDealer();
-                dealerVal = GetHandValue(DealerHand);
-            }
-
-            if (dealerVal > 21)
-            {
-                gameStatus.text = "Dealer Broke! You Win!";
-                playerChips += (playerBet * 2);
-
-            }
-            else
-            {
-                //Player wins
-                if (playerVal > dealerVal)
-                {
-                    gameStatus.text = "WINNER!";
-                    //win back double
-                    playerChips += (playerBet * 2);
-                }
-
-                if (playerVal < dealerVal)
-                {
-                    gameStatus.text = "Loser!";
-                }
-
-                if (playerVal == dealerVal)
-                {
-                    gameStatus.text = "TIE!";
-                    //Get Bet back
-                    playerChips += playerBet;
-                }
-            }
-            //reset player bet 
-            playerBet = 0;
-
-        }
-        void Start()
-        {
-            SetupNewGame();
-        }
-
-        //Calculate Player Hand Value
 
         public int GetHandValue(List<Card> cards)
         {
@@ -178,16 +87,13 @@ namespace Blackjack
             return value;
         }
 
-
-
-
         public void SetupNewGame()
         {
             //If game ended mid, return chips
             if (CurrentState != GameState.END)
             {
-             playerChips += playerBet;
-             playerBet = 0;   
+                playerChips += playerBet;
+                playerBet = 0;
             }
             //Clear player hand
             foreach (Card c in PlayerHand)
@@ -218,8 +124,112 @@ namespace Blackjack
             //Start with player furthest right,
         }
 
+        public bool IsGameState(GameState state)
+        {
+            return (CurrentState == state);
+        }
+
+        public void ChangeBet(int amt)
+        {
+            if ((playerChips >= 0) && !(playerBet + amt < 0))
+            {
+                playerBet += amt;
+                playerChips -= amt;
+            }
+        }
+        public void PlaceBet()
+        {
+            //Deal cards after bet is placed
+            gameStatus.text = "";
+            CurrentState = GameState.PLAYERTURN;
+            //Deal 2 cards to the dealer
+            DealCardDealer(false);
+            DealCardDealer();
+
+            //Deal 2 Cards to the Player
+            DealCardPlayer();
+            DealCardPlayer();
+
+        }
+        public void Stay()
+        {
+            CurrentState = GameState.END;
+            DealerHand[0].UpdateCardSprite();
 
 
+            var dealerVal = GetHandValue(DealerHand);
+            var playerVal = GetHandValue(PlayerHand);
+
+            while (dealerVal < 17)
+            {
+                //Dealer must draw another card
+                DealCardDealer();
+                dealerVal = GetHandValue(DealerHand);
+            }
+
+            if (dealerVal > 21)
+            {
+                gameStatus.text = "Dealer Broke! You Win!";
+                playerChips += (playerBet * 2);
+
+            }
+            else
+            {
+                //Player wins
+                if (playerVal > dealerVal)
+                {
+                    gameStatus.text = "WINNER!";
+                    //win back double
+                    playerChips += (playerBet * 2);
+                }
+
+                if (playerVal < dealerVal)
+                {
+                    gameStatus.text = "Loser!";
+                }
+
+                if (playerVal == dealerVal)
+                {
+                    gameStatus.text = "TIE!";
+                    //Get Bet back
+                    playerChips += playerBet;
+                }
+            }
+            //reset player bet 
+            playerBet = 0;
+
+        }
+
+        public void DealCardPlayer()
+        {
+            //Hit the player with a new card
+
+            var x = prefabCard.transform.position.x;
+            var y = prefabCard.transform.position.y;
+
+            PlayerHand.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * PlayerHand.Count, y, -1 * PlayerHand.Count), Quaternion.identity));
+            PlayerHand[PlayerHand.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
+            PlayerHand[PlayerHand.Count - 1].Face = faces[Random.Range(0, faces.Count)];
+            PlayerHand[PlayerHand.Count - 1].UpdateCardSprite();
+
+            var score = GetHandValue(PlayerHand);
+            scoreText.text = string.Format("PlayerHand Value:{0} ", score);
+
+
+
+            if (score == 21)
+            {
+                gameStatus.text = "BLACKJACK :D";
+                CurrentState = GameState.BLACKJACK;
+            }
+            if (score > 21)
+            {
+                gameStatus.text = "BUST";
+                CurrentState = GameState.END;
+                playerBet = 0;
+            }
+
+        }
 
         void DealCardDealer()
         {
@@ -242,37 +252,11 @@ namespace Blackjack
 
 
 
-        //Handles increasing or decreasing bet 
-        public void ChangeBet(int amt)
+        void Start()
         {
-            if ((playerChips >= 0) && !(playerBet + amt < 0))
-            {
-                playerBet += amt;
-                playerChips -= amt;
-            }
+            SetupNewGame();
         }
 
-
-
-        public bool IsGameState(GameState state)
-        {
-            return (CurrentState == state);
-        }
-        public void PlaceBet()
-        {
-            //Deal cards after bet is placed
-            gameStatus.text = "";
-            CurrentState = GameState.PLAYERTURN;
-            //Deal 2 cards to the dealer
-            DealCardDealer(false);
-            DealCardDealer();
-
-            //Deal 2 Cards to the Player
-            DealCardPlayer();
-            DealCardPlayer();
-
-        }
-        // Update is called once per frame
         void Update()
         {
             playerBetText.text = string.Format("{0}", playerBet);

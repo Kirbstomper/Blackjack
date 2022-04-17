@@ -14,13 +14,6 @@ namespace Blackjack
 
         public GameManager gameManager;
 
-
-        // Start is called before the first frame update
-        void Start()
-        {
-        }
-
-
         public void PressStay()
         {
             if (gameManager.IsGameState(GameManager.GameState.PLAYERTURN)
@@ -52,14 +45,14 @@ namespace Blackjack
 
         public void PressRaise()
         {
-            if(gameManager.IsGameState(GameManager.GameState.BETTING))
+            if (gameManager.IsGameState(GameManager.GameState.BETTING))
                 gameManager.ChangeBet(10);
         }
 
         public void PressLower()
         {
-           if(gameManager.IsGameState(GameManager.GameState.BETTING))
-                gameManager.ChangeBet(-10); 
+            if (gameManager.IsGameState(GameManager.GameState.BETTING))
+                gameManager.ChangeBet(-10);
         }
 
         void getControllerInput()
