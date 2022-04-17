@@ -14,7 +14,11 @@ public class GameManager : MonoBehaviour
     //Maybe set this as a queue?
     public  List<Card> Deck = new List<Card>();
     public Card prefabCard;
+
+    public Transform dealerFaceDown;
     public List<Card> PlayerHand = new List<Card>();
+
+    public List<Card> DealerHand = new List<Card>();
     string[] suits = {"Tiles", "Clovers", "Pikes","Hearts"};
     string[] faces = {"A","2", "3", "4", "5","6","7", "8", "9", "10", "King", "Queen", "Jack"};
     
@@ -45,14 +49,38 @@ public class GameManager : MonoBehaviour
     void Start()
     {
  
-        
+        SetupNewGame();
     }
 
     //Setup the deck
    
-    void setupNewGame(){
-        //Deal 2 cards to the dealer
+    public void SetupNewGame(){
+        //Clear player hand
+        foreach(Card c in PlayerHand)
+        {
+            Destroy(c.gameObject);
+        }
+        PlayerHand.Clear();
 
+        //Same for dealer Hand
+        foreach(Card c in DealerHand)
+        {
+            Destroy(c.gameObject);
+        }
+        DealerHand.Clear(); 
+
+        //Deal 2 cards to the dealer
+        var x = dealerFaceDown.position.x;
+        var y = dealerFaceDown.position.y;
+        DealerHand.Add(Instantiate(prefabCard , new Vector3(x+0.5f*DealerHand.Count,y,-1*DealerHand.Count), Quaternion.identity));
+        DealerHand[DealerHand.Count-1].Suit = suits[Random.Range(0,suits.Length)];
+        DealerHand[DealerHand.Count-1].Face = faces[Random.Range(0, faces.Length)];
+        DealerHand[DealerHand.Count-1].UpdateCardSprite();
+
+        DealerHand.Add(Instantiate(prefabCard , new Vector3(x+0.5f*DealerHand.Count,y,-1*DealerHand.Count), Quaternion.identity));
+        DealerHand[DealerHand.Count-1].Suit = suits[Random.Range(0,suits.Length)];
+        DealerHand[DealerHand.Count-1].Face = faces[Random.Range(0, faces.Length)];
+        DealerHand[DealerHand.Count-1].UpdateCardSprite();
 
         //Populate players list with connected players
         //Deal 2 cards to each player

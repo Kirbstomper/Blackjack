@@ -16,7 +16,11 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: d6cd3fbebf120468ca09ea8be5b96612
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: d454ec9de314c457893aa23823d6d936
+    m_Address: Assets/Sprites/black
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 7a4decd9400fe4850973e8443ff6273b, type: 2}
   m_SchemaSet:
