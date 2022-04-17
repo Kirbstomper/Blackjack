@@ -12,20 +12,20 @@ public class Card : MonoBehaviour
     public string Face;
     void Start()
     {
-       
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void UpdateCardSprite()
     {
-        AsyncOperationHandle<Sprite> spriteHandle = 
+        AsyncOperationHandle<Sprite> spriteHandle =
             Addressables.LoadAssetAsync<Sprite>(string.Format("Assets/Sprites/black/{0}_{1}_black.png", Suit, Face));
-        
+
         spriteHandle.Completed += UpdateSpriteWhenReady;
     }
 
