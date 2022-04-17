@@ -30,6 +30,15 @@ public class Card : MonoBehaviour
     }
 
 
+    public void ShowBack()
+    {
+        AsyncOperationHandle<Sprite> spriteHandle =
+             Addressables.LoadAssetAsync<Sprite>(string.Format("Assets/Sprites/black/back_black.png", Suit, Face));
+
+        spriteHandle.Completed += UpdateSpriteWhenReady;
+    }
+
+
     void UpdateSpriteWhenReady(AsyncOperationHandle<Sprite> handleToCheck)
     {
 

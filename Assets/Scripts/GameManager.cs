@@ -73,6 +73,7 @@ namespace Blackjack
         **/
         public void Stay()
         {
+            DealerHand[0].UpdateCardSprite();
             stayButton.interactable = false;
             hitButton.interactable = false;
 
@@ -191,7 +192,7 @@ namespace Blackjack
             stayButton.interactable = true;
 
             //Deal 2 cards to the dealer
-            DealCardDealer();
+            DealCardDealer(false);
             DealCardDealer();
 
             //Deal 2 Cards to the Player
@@ -207,15 +208,23 @@ namespace Blackjack
 
 
 
-
         void DealCardDealer()
+        {
+            DealCardDealer(true);
+        }
+        void DealCardDealer(bool visable)
         {
             var x = dealerFaceDown.position.x;
             var y = dealerFaceDown.position.y;
             DealerHand.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * DealerHand.Count, y, -1 * DealerHand.Count), Quaternion.identity));
             DealerHand[DealerHand.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
             DealerHand[DealerHand.Count - 1].Face = faces[Random.Range(0, faces.Count)];
-            DealerHand[DealerHand.Count - 1].UpdateCardSprite();
+            if (!visable)
+                DealerHand[DealerHand.Count - 1].ShowBack();
+            else
+            {
+                DealerHand[DealerHand.Count - 1].UpdateCardSprite();
+            }
         }
         // Update is called once per frame
         void Update()
