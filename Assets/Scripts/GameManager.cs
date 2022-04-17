@@ -24,7 +24,7 @@ namespace Blackjack
         public List<Card> DealerHand = new List<Card>();
 
 
-        public enum GameState { PLAYERTURN, BETTING, BUST, BLACKJACK, END }
+        public enum GameState { PLAYERTURN, BETTING, BLACKJACK, END }
 
         GameState CurrentState;
 
@@ -67,7 +67,8 @@ namespace Blackjack
             if (score > 21)
             {
                 gameStatus.text = "BUST";
-                CurrentState = GameState.BUST;
+                CurrentState = GameState.END;
+                playerBet = 0;
             }
 
         }
@@ -91,10 +92,11 @@ namespace Blackjack
                 dealerVal = GetHandValue(DealerHand);
             }
 
-
             if (dealerVal > 21)
             {
                 gameStatus.text = "Dealer Broke! You Win!";
+                playerChips += (playerBet * 2);
+
             }
             else
             {
@@ -102,6 +104,8 @@ namespace Blackjack
                 if (playerVal > dealerVal)
                 {
                     gameStatus.text = "WINNER!";
+                    //win back double
+                    playerChips += (playerBet * 2);
                 }
 
                 if (playerVal < dealerVal)
@@ -112,10 +116,12 @@ namespace Blackjack
                 if (playerVal == dealerVal)
                 {
                     gameStatus.text = "TIE!";
+                    //Get Bet back
+                    playerChips += playerBet;
                 }
             }
-
-
+            //reset player bet 
+            playerBet = 0;
 
         }
         void Start()
@@ -177,6 +183,12 @@ namespace Blackjack
 
         public void SetupNewGame()
         {
+            //If game ended mid, return chips
+            if (CurrentState != GameState.END)
+            {
+             playerChips += playerBet;
+             playerBet = 0;   
+            }
             //Clear player hand
             foreach (Card c in PlayerHand)
             {
@@ -233,7 +245,7 @@ namespace Blackjack
         //Handles increasing or decreasing bet 
         public void ChangeBet(int amt)
         {
-            if (!(playerBet + amt > playerChips) && !(playerBet + amt < 0))
+            if ((playerChips >= 0) && !(playerBet + amt < 0))
             {
                 playerBet += amt;
                 playerChips -= amt;
