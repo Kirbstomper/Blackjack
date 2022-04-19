@@ -140,6 +140,11 @@ namespace Blackjack
         }
         public void PlaceBet()
         {
+            if (playerBet == 0)
+            {
+                gameStatus.text = "Your bet must be more than 0 coins to play!!!!";
+                return;
+            }
             //Deal cards after bet is placed
             gameStatus.text = "";
             CurrentState = GameState.PLAYERTURN;
@@ -153,11 +158,16 @@ namespace Blackjack
 
             //Check if the player can double down
             canDoubleDown = (GetHandValue(PlayerHand) == 9 ||GetHandValue(PlayerHand) == 10 ||GetHandValue(PlayerHand) == 11);
-               
+            canDoubleDown = (canDoubleDown && ((playerChips/2) >= playerBet));
 
         }
         public void Stay()
         {
+            if (CurrentState == GameState.DOUBLED_DOWN){ //IF doubled down, we need to flip card and update value
+                PlayerHand[2].UpdateCardSprite();
+                scoreText.text = string.Format("PlayerHand Value:{0} ", GetHandValue(PlayerHand));
+
+            }
             CurrentState = GameState.END;
             DealerHand[0].UpdateCardSprite();
 
@@ -236,12 +246,25 @@ namespace Blackjack
 
         }
 
+        public void DealCardDoubleDown()
+        {
+            //Hit the player with a new card
+
+            var x = prefabCard.transform.position.x;
+            var y = prefabCard.transform.position.y;
+
+            PlayerHand.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * PlayerHand.Count, y, -1 * PlayerHand.Count), Quaternion.identity));
+            PlayerHand[PlayerHand.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
+            PlayerHand[PlayerHand.Count - 1].Face = faces[Random.Range(0, faces.Count)];
+            PlayerHand[PlayerHand.Count - 1].ShowBack();
+        }
         public void DoubleDown()
         {
 
             //Deal card to player facedown
-            DealCardPlayer();
-
+            DealCardDoubleDown();
+            //Remove their monies
+            ChangeBet(playerBet);
             //Change gamestate
             CurrentState = GameState.DOUBLED_DOWN;
 
