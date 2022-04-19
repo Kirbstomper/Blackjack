@@ -21,6 +21,10 @@ MonoBehaviour:
     m_Address: Assets/Sprites/black
     m_ReadOnly: 0
     m_SerializedLabels: []
+  - m_GUID: cd6f95a2c479d4b9d8c0b7f01ba8f446
+    m_Address: Assets/Music/happyrock.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 7a4decd9400fe4850973e8443ff6273b, type: 2}
   m_SchemaSet:
