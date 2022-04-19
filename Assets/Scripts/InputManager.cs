@@ -17,7 +17,8 @@ namespace Blackjack
         public void PressStay()
         {
             if (gameManager.IsGameState(GameManager.GameState.PLAYERTURN)
-            || gameManager.IsGameState(GameManager.GameState.BLACKJACK))
+            || gameManager.IsGameState(GameManager.GameState.BLACKJACK)
+            || gameManager.IsGameState(GameManager.GameState.DOUBLED_DOWN))
             {
                 gameManager.Stay();
             }
@@ -53,6 +54,14 @@ namespace Blackjack
         {
             if (gameManager.IsGameState(GameManager.GameState.BETTING))
                 gameManager.ChangeBet(-10);
+        }
+
+        public void PressDoubleDown()
+        {
+            if (gameManager.canDoubleDown && gameManager.IsGameState(GameManager.GameState.PLAYERTURN))
+            {
+                gameManager.DoubleDown();
+            }
         }
 
         void getControllerInput()

@@ -24,9 +24,10 @@ namespace Blackjack
         public List<Card> DealerHand = new List<Card>();
 
 
-        public enum GameState { PLAYERTURN, BETTING, BLACKJACK, END }
+        public enum GameState { PLAYERTURN, BETTING, DOUBLED_DOWN, BLACKJACK, END }
 
         GameState CurrentState;
+        public bool canDoubleDown = false; // Can the player double down this hand?
 
 
 
@@ -150,6 +151,10 @@ namespace Blackjack
             DealCardPlayer();
             DealCardPlayer();
 
+            //Check if the player can double down
+            canDoubleDown = (GetHandValue(PlayerHand) == 9 ||GetHandValue(PlayerHand) == 10 ||GetHandValue(PlayerHand) == 11);
+               
+
         }
         public void Stay()
         {
@@ -231,6 +236,16 @@ namespace Blackjack
 
         }
 
+        public void DoubleDown()
+        {
+
+            //Deal card to player facedown
+            DealCardPlayer();
+
+            //Change gamestate
+            CurrentState = GameState.DOUBLED_DOWN;
+
+        }
         void DealCardDealer()
         {
             DealCardDealer(true);
