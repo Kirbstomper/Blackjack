@@ -119,6 +119,7 @@ namespace Blackjack
             CurrentState = GameState.BETTING;
 
 
+
             //Populate players list with connected players
             //Deal 2 cards to each player
 
@@ -157,13 +158,14 @@ namespace Blackjack
             DealCardPlayer();
 
             //Check if the player can double down
-            canDoubleDown = (GetHandValue(PlayerHand) == 9 ||GetHandValue(PlayerHand) == 10 ||GetHandValue(PlayerHand) == 11);
-            canDoubleDown = (canDoubleDown && ((playerChips/2) >= playerBet));
+            canDoubleDown = (GetHandValue(PlayerHand) == 9 || GetHandValue(PlayerHand) == 10 || GetHandValue(PlayerHand) == 11);
+            canDoubleDown = (canDoubleDown && ((playerChips / 2) >= playerBet));
 
         }
         public void Stay()
         {
-            if (CurrentState == GameState.DOUBLED_DOWN){ //IF doubled down, we need to flip card and update value
+            if (CurrentState == GameState.DOUBLED_DOWN)
+            { //IF doubled down, we need to flip card and update value
                 PlayerHand[2].UpdateCardSprite();
                 scoreText.text = string.Format("PlayerHand Value:{0} ", GetHandValue(PlayerHand));
 
