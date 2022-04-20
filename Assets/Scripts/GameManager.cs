@@ -21,10 +21,12 @@ namespace Blackjack
         int playerChips = 500;
         int playerBet = 0;
 
+        int playerSideBet = 0;
+
         public List<Card> DealerHand = new List<Card>();
 
 
-        public enum GameState { PLAYERTURN, BETTING, DOUBLED_DOWN, BLACKJACK, END }
+        public enum GameState { PLAYERTURN, BETTING, DOUBLED_DOWN, SIDEBETTING, BLACKJACK, END }
 
         GameState CurrentState;
         public bool canDoubleDown = false; // Can the player double down this hand?
@@ -153,6 +155,8 @@ namespace Blackjack
             DealCardDealer(false);
             DealCardDealer();
 
+            DealerHand[1].Face = "A";
+
             //Deal 2 Cards to the Player
             DealCardPlayer();
             DealCardPlayer();
@@ -161,6 +165,33 @@ namespace Blackjack
             canDoubleDown = (GetHandValue(PlayerHand) == 9 || GetHandValue(PlayerHand) == 10 || GetHandValue(PlayerHand) == 11);
             canDoubleDown = (canDoubleDown && ((playerChips / 2) >= playerBet));
 
+            // If the dealer shown card is an ace, we can offer a side bet
+            if (DealerHand[1].Face == "A")
+            {
+                gameStatus.text = "Side Betting Open!";
+                CurrentState = GameState.SIDEBETTING;
+            }
+
+        }
+
+        public void PlaceSideBet()
+        {
+            //IF a side bet is placed we should go ahead see if it pays out
+            if (GetHandValue(DealerHand) == 21 && playerSideBet > 0)
+            {
+                gameStatus.text = "Side bet paid! Dealer has a blackjack";
+                playerChips += (playerSideBet * 2);
+            }
+            CurrentState = GameState.PLAYERTURN;
+        }
+
+        public void ChangeSideBet(int amt)
+        {
+            if ((playerChips >= 0) && !(playerSideBet + amt < (playerBet / 2)))
+            {
+                playerSideBet += amt;
+                playerChips -= amt;
+            }
         }
         public void Stay()
         {
@@ -247,7 +278,6 @@ namespace Blackjack
             }
 
         }
-
         public void DealCardDoubleDown()
         {
             //Hit the player with a new card
@@ -299,7 +329,17 @@ namespace Blackjack
 
         void Update()
         {
-            playerBetText.text = string.Format("{0}", playerBet);
+
+
+            if (IsGameState(GameState.SIDEBETTING))
+            {
+                playerBetText.text = string.Format("{0}", playerSideBet);
+            }
+            else
+            {
+                playerBetText.text = string.Format("{0}", playerBet);
+
+            }
             playerChipsText.text = string.Format("{0}", playerChips);
 
         }

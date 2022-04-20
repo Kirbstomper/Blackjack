@@ -41,19 +41,34 @@ namespace Blackjack
         {
             if (gameManager.IsGameState(GameManager.GameState.BETTING))
                 gameManager.PlaceBet();
+
+            if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
+                gameManager.PlaceSideBet();
         }
 
 
         public void PressRaise()
         {
             if (gameManager.IsGameState(GameManager.GameState.BETTING))
+            {
                 gameManager.ChangeBet(10);
+            }
+            if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
+            {
+                gameManager.ChangeSideBet(10);
+            }
         }
 
         public void PressLower()
         {
             if (gameManager.IsGameState(GameManager.GameState.BETTING))
+            {
                 gameManager.ChangeBet(-10);
+            }
+            if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
+            {
+                gameManager.ChangeSideBet(-10);
+            }
         }
 
         public void PressDoubleDown()
