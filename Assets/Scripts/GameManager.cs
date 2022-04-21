@@ -135,7 +135,7 @@ namespace Blackjack
 
         public void ChangeBet(int amt)
         {
-            if ((playerChips >= 0) && !(playerBet + amt < 0))
+            if ((playerChips >= 0) && (playerBet + amt >= 0))
             {
                 playerBet += amt;
                 playerChips -= amt;
@@ -155,7 +155,7 @@ namespace Blackjack
             DealCardDealer(false);
             DealCardDealer();
 
-            DealerHand[1].Face = "A";
+           
 
             //Deal 2 Cards to the Player
             DealCardPlayer();
@@ -187,7 +187,8 @@ namespace Blackjack
 
         public void ChangeSideBet(int amt)
         {
-            if ((playerChips >= 0) && !(playerSideBet + amt < (playerBet / 2)))
+            print(string.Format("Current sidebet {0}", playerSideBet));
+            if ((playerChips > 0) && (playerSideBet + amt <= (playerBet / 2)) && (playerSideBet+amt >= 0))
             {
                 playerSideBet += amt;
                 playerChips -= amt;
@@ -330,7 +331,7 @@ namespace Blackjack
         void Update()
         {
 
-
+            print(CurrentState);
             if (IsGameState(GameState.SIDEBETTING))
             {
                 playerBetText.text = string.Format("{0}", playerSideBet);

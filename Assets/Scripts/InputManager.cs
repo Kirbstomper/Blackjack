@@ -42,8 +42,9 @@ namespace Blackjack
             if (gameManager.IsGameState(GameManager.GameState.BETTING))
                 gameManager.PlaceBet();
 
-            if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
+            else if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
                 gameManager.PlaceSideBet();
+
         }
 
 
@@ -65,7 +66,7 @@ namespace Blackjack
             {
                 gameManager.ChangeBet(-10);
             }
-            if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
+            else if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
             {
                 gameManager.ChangeSideBet(-10);
             }
