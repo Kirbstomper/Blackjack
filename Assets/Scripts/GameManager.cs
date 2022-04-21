@@ -92,10 +92,10 @@ namespace Blackjack
 
         public void SetupNewGame()
         {
-            //If game ended mid, return chips
+            //If game ended mid, return half chips
             if (CurrentState != GameState.END)
             {
-                playerChips += playerBet;
+                playerChips += playerBet/2;
                 playerBet = 0;
             }
             //Clear player hand

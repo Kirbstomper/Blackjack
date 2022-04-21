@@ -34,7 +34,10 @@ namespace Blackjack
 
         public void PressReset()
         {
+            if (gameManager.IsGameState(GameManager.GameState.PLAYERTURN))
+            {
             gameManager.SetupNewGame();
+            }
         }
 
         public void PressBet()
