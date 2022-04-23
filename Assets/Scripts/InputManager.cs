@@ -20,7 +20,7 @@ namespace Blackjack
             {
                 gameManager.Stay();
             }
-            
+
         }
 
         public void PressHit()
@@ -33,9 +33,9 @@ namespace Blackjack
 
         public void PressReset()
         {
-            if (gameManager.IsGameState(GameState.PLAYERTURN))
+            if (gameManager.IsGameState(GameState.PLAYERTURN) || gameManager.IsGameState(GameState.END))
             {
-            gameManager.SetupNewGame();
+                gameManager.SetupNewGame();
             }
         }
 

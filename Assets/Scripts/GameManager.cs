@@ -26,9 +26,10 @@ namespace Blackjack
         public List<Card> DealerHand = new List<Card>();
 
         GameState CurrentState;
-        public PlayerHand currentHand;
         int currentHandIndex = 0;
-
+        public PlayerHand currentHand;
+        
+    
 
         //UI elements
         public TextMeshProUGUI scoreText;
@@ -116,7 +117,7 @@ namespace Blackjack
 
             PlayerHands.Clear();// Clear out the current hands
             PlayerHands.Add(new PlayerHand());//Create the first player hand
-            currentHand = PlayerHands[0];       
+            currentHand = PlayerHands[0];
             DealerHand.Clear(); // Clear the dealers hand
 
             //Clear UI elements
@@ -209,9 +210,30 @@ namespace Blackjack
         ***/
         public void NextHand()
         {
-                //If there are no open hands end game
+
+            var shouldEnd = true;
+            foreach (PlayerHand hand in PlayerHands) //Determine if game sh ould end by checking all hand status
+            {
+                if (hand.handState == HandState.OPEN)
+                    shouldEnd = false;
+
+            }
+
+            if (shouldEnd) //If there are no open hands end game
+            {
                 EndGame();
-                //If there is an open hand, continue the game
+            }
+            else
+            {
+                foreach (PlayerHand hand in PlayerHands) //Determine if game sh ould end by checking all hand status
+                {
+                    if (hand.handState == HandState.OPEN)
+                    {
+                        currentHand = hand;
+                        return;
+                    }
+                }
+            }
 
         }
 
@@ -244,11 +266,18 @@ namespace Blackjack
                 {
                     hand.cards[2].UpdateCardSprite();
                     scoreText.text = string.Format("PlayerHand Value:{0} ", GetHandValue(hand.cards));
-
                 }
+                
 
+                if(hand.handState == HandState.BUST)//Handle a bust
+                {
+                    gameStatus.text = "You Broke! You Lost!";
+ 
+                    continue;
+                }
                 var playerVal = GetHandValue(hand.cards); //Get the value of the hand
-
+                
+        
                 if (dealerVal > 21)
                 {
                     gameStatus.text = "Dealer Broke! You Win!";
@@ -300,18 +329,16 @@ namespace Blackjack
             currentHand.cards[currentHand.cards.Count - 1].UpdateCardSprite();
 
             var score = GetHandValue(currentHand.cards);
-            scoreText.text = string.Format("PlayerHand Value:{0} ", score);
-
-
+            
             if (score == 21)
             {
                 gameStatus.text = "BLACKJACK :D";
-                currentHand.handState = HandState.BLACKJACK;
+                PlayerHands[PlayerHands.IndexOf(currentHand)].handState = HandState.BLACKJACK;
             }
             if (score > 21)
             {
                 gameStatus.text = "BUST";
-                currentHand.handState = HandState.BLACKJACK;
+                PlayerHands[PlayerHands.IndexOf(currentHand)].handState = HandState.BUST;
             }
 
         }
@@ -367,11 +394,15 @@ namespace Blackjack
 
         void Update()
         {
-
+            scoreText.text = string.Format("PlayerHand Value:{0} ", GetHandValue(currentHand.cards));
             print(CurrentState);
             if (IsGameState(GameState.SIDEBETTING))
             {
                 playerBetText.text = string.Format("{0}", playerSideBet);
+            }
+            else
+            {
+                playerBetText.text = string.Format("{0}", playerBet);
             }
 
             playerChipsText.text = string.Format("{0}", playerChips);
