@@ -7,7 +7,7 @@ namespace Blackjack
     public class PlayerHand
     {
         public List<Card> cards = new List<Card>(); //The cards in this current hand
-        public GameState handState; // The gamestate for the selected hand
+        public HandState handState; // The state of the current hand. Determines what can be done
         
         public bool canDoubleDown = false; //Can this player 
         public bool canSplit = false; //Can the player currently split this hand

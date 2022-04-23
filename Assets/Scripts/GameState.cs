@@ -5,5 +5,6 @@ using UnityEngine;
 
 namespace Blackjack
 {
-    public enum GameState { PLAYERTURN, BETTING, DOUBLED_DOWN, SIDEBETTING, BLACKJACK, END }
+    public enum GameState { PLAYERTURN, BETTING, SIDEBETTING, BLACKJACK, END }
+    public enum HandState { OPEN, STAY,DOUBLED_DOWN, BLACKJACK, BUST}
 }

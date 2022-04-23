@@ -16,25 +16,24 @@ namespace Blackjack
 
         public void PressStay()
         {
-            if (gameManager.IsGameState(GameManager.GameState.PLAYERTURN)
-            || gameManager.IsGameState(GameManager.GameState.BLACKJACK)
-            || gameManager.IsGameState(GameManager.GameState.DOUBLED_DOWN))
+            if (gameManager.IsGameState(GameState.PLAYERTURN))
             {
                 gameManager.Stay();
             }
+            
         }
 
-        public void PressDeal()
+        public void PressHit()
         {
-            if (gameManager.IsGameState(GameManager.GameState.PLAYERTURN))
+            if (gameManager.IsGameState(GameState.PLAYERTURN))
             {
-                gameManager.DealCardPlayer();
+                gameManager.Hit();
             }
         }
 
         public void PressReset()
         {
-            if (gameManager.IsGameState(GameManager.GameState.PLAYERTURN))
+            if (gameManager.IsGameState(GameState.PLAYERTURN))
             {
             gameManager.SetupNewGame();
             }
@@ -42,10 +41,11 @@ namespace Blackjack
 
         public void PressBet()
         {
-            if (gameManager.IsGameState(GameManager.GameState.BETTING))
+            if (gameManager.IsGameState(GameState.BETTING))
+            {
                 gameManager.PlaceBet();
-
-            else if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
+            }
+            else if (gameManager.IsGameState(GameState.SIDEBETTING))
                 gameManager.PlaceSideBet();
 
         }
@@ -53,11 +53,11 @@ namespace Blackjack
 
         public void PressRaise()
         {
-            if (gameManager.IsGameState(GameManager.GameState.BETTING))
+            if (gameManager.IsGameState(GameState.BETTING))
             {
                 gameManager.ChangeBet(10);
             }
-            if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
+            if (gameManager.IsGameState(GameState.SIDEBETTING))
             {
                 gameManager.ChangeSideBet(10);
             }
@@ -65,11 +65,11 @@ namespace Blackjack
 
         public void PressLower()
         {
-            if (gameManager.IsGameState(GameManager.GameState.BETTING))
+            if (gameManager.IsGameState(GameState.BETTING))
             {
                 gameManager.ChangeBet(-10);
             }
-            else if (gameManager.IsGameState(GameManager.GameState.SIDEBETTING))
+            else if (gameManager.IsGameState(GameState.SIDEBETTING))
             {
                 gameManager.ChangeSideBet(-10);
             }
@@ -77,17 +77,19 @@ namespace Blackjack
 
         public void PressDoubleDown()
         {
-            if (gameManager.canDoubleDown && gameManager.IsGameState(GameManager.GameState.PLAYERTURN))
+            if (gameManager.currentHand.canDoubleDown && gameManager.IsGameState(GameState.PLAYERTURN))
             {
                 gameManager.DoubleDown();
             }
+
+            gameManager.NextHand();
         }
 
         void getControllerInput()
         {
             if (Gamepad.current.buttonSouth.wasPressedThisFrame)
             {
-                PressDeal();
+                PressHit();
             }
 
             if (Gamepad.current.buttonEast.wasPressedThisFrame)

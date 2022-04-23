@@ -10,7 +10,7 @@ namespace Blackjack
     public class GameManager : MonoBehaviour
     {
         // Start is called before the first frame update
-
+        public const int PLAYER_STARTING_CHIPS = 500;
         //Game manager should have list of players and the dealer (who is technically also a player)
         //Maybe set this as a queue?
         public List<Card> Deck = new List<Card>();
@@ -18,25 +18,16 @@ namespace Blackjack
 
         public Transform dealerFaceDown;
         public List<PlayerHand> PlayerHands = new List<PlayerHand>();
-        int playerChips = 500;
-        int playerBet = 0;
+        int playerChips;
 
+        public int playerBet;
         int playerSideBet = 0;
 
         public List<Card> DealerHand = new List<Card>();
 
-
-
-
-        List<List<Card>> playerHands = new List<List<Card>>(); //Player hands will be considered in 
-
         GameState CurrentState;
-        public bool canDoubleDown = false; // Can the player double down this hand?
-
-        public List<bool> canSplit = new List<bool> { false }; // Can the player split this hand?
-
-
-
+        public PlayerHand currentHand;
+        int currentHandIndex = 0;
 
 
         //UI elements
@@ -98,25 +89,35 @@ namespace Blackjack
 
         public void SetupNewGame()
         {
-            //If game ended mid, return half chips
+            //If game ended mid, return half chips from all hands
             if (CurrentState != GameState.END)
             {
-                playerChips += playerBet / 2;
-                playerBet = 0;
-            }
-            //Clear player hand
-            foreach (Card c in PlayerHand)
-            {
-                Destroy(c.gameObject);
-            }
-            PlayerHand.Clear();
+                foreach (PlayerHand hand in PlayerHands)
+                {
+                    playerChips += hand.bet / 2;
+                }
 
-            //Same for dealer Hand
-            foreach (Card c in DealerHand)
+            }
+
+            //Destroy all cards on the field
+            foreach (PlayerHand hand in PlayerHands) //Players cards
+            {
+                foreach (Card c in hand.cards)
+                {
+                    Destroy(c.gameObject);
+                }
+            }
+
+            foreach (Card c in DealerHand)//Dealers cards
             {
                 Destroy(c.gameObject);
             }
-            DealerHand.Clear();
+
+
+            PlayerHands.Clear();// Clear out the current hands
+            PlayerHands.Add(new PlayerHand());//Create the first player hand
+            currentHand = PlayerHands[0];       
+            DealerHand.Clear(); // Clear the dealers hand
 
             //Clear UI elements
             scoreText.text = "";
@@ -126,12 +127,6 @@ namespace Blackjack
             gameStatus.text = "Please Place your bet!";
             CurrentState = GameState.BETTING;
 
-
-
-            //Populate players list with connected players
-            //Deal 2 cards to each player
-
-            //Start with player furthest right,
         }
 
         public bool IsGameState(GameState state)
@@ -147,7 +142,7 @@ namespace Blackjack
                 playerChips -= amt;
             }
         }
-        public void PlaceBet()
+        public void PlaceBet() //Places bet and gets the player hand setup
         {
             if (playerBet == 0)
             {
@@ -163,13 +158,13 @@ namespace Blackjack
 
 
 
-            //Deal 2 Cards to the Player
+            //Deal 2 Cards to the players current hand
             DealCardPlayer();
             DealCardPlayer();
 
             //Check if the player can double down
-            canDoubleDown = (GetHandValue(PlayerHand) == 9 || GetHandValue(PlayerHand) == 10 || GetHandValue(PlayerHand) == 11);
-            canDoubleDown = (canDoubleDown && ((playerChips / 2) >= playerBet));
+            currentHand.canDoubleDown = (GetHandValue(currentHand.cards) == 9 || GetHandValue(currentHand.cards) == 10 || GetHandValue(currentHand.cards) == 11);
+            currentHand.canDoubleDown = (currentHand.canDoubleDown && ((playerChips / 2) >= playerBet));
 
             // If the dealer shown card is an ace, we can offer a side bet
             if (DealerHand[1].Face == "A")
@@ -202,59 +197,96 @@ namespace Blackjack
         }
         public void Stay()
         {
-            if (CurrentState == GameState.DOUBLED_DOWN)
-            { //IF doubled down, we need to flip card and update value
-                PlayerHand[2].UpdateCardSprite();
-                scoreText.text = string.Format("PlayerHand Value:{0} ", GetHandValue(PlayerHand));
+            currentHand.handState = HandState.STAY;
+            NextHand();
+        }
 
-            }
+
+
+        /***
+            Whenever an action is taken, we need to move the current hand position to the next availible hand that can make a move, if no hands are open,
+            we should initiate ending the game
+        ***/
+        public void NextHand()
+        {
+                //If there are no open hands end game
+                EndGame();
+                //If there is an open hand, continue the game
+
+        }
+
+
+        //It makes sense to me for all operations to effect the PlayerHand, not the overall game.
+        //This means at the end the game has to be settled for each hand once they are all stay
+        //Or busted, or blackjacked. 
+        public void EndGame()
+        {
+
+
             CurrentState = GameState.END;
-            DealerHand[0].UpdateCardSprite();
+            DealerHand[0].UpdateCardSprite(); //Flip the card for the dealer
 
 
             var dealerVal = GetHandValue(DealerHand);
-            var playerVal = GetHandValue(PlayerHand);
 
-            while (dealerVal < 17)
+            while (dealerVal < 17)  //Dealer must be at or above 17
             {
                 //Dealer must draw another card
                 DealCardDealer();
                 dealerVal = GetHandValue(DealerHand);
             }
 
-            if (dealerVal > 21)
+            //For each player hand we need to figure out where it lies
+
+            foreach (PlayerHand hand in PlayerHands)
             {
-                gameStatus.text = "Dealer Broke! You Win!";
-                playerChips += (playerBet * 2);
+                if (hand.handState == HandState.DOUBLED_DOWN)//IF doubled down, we need to flip card and update value 
+                {
+                    hand.cards[2].UpdateCardSprite();
+                    scoreText.text = string.Format("PlayerHand Value:{0} ", GetHandValue(hand.cards));
 
+                }
+
+                var playerVal = GetHandValue(hand.cards); //Get the value of the hand
+
+                if (dealerVal > 21)
+                {
+                    gameStatus.text = "Dealer Broke! You Win!";
+                    playerChips += (hand.bet * 2);
+
+                }
+
+                else
+                {
+                    //Player wins
+                    if (playerVal > dealerVal)
+                    {
+                        gameStatus.text = "WINNER!";
+                        //win back double
+                        playerChips += (hand.bet * 2);
+                    }
+
+                    if (playerVal < dealerVal)
+                    {
+                        gameStatus.text = "Loser!";
+                    }
+
+                    if (playerVal == dealerVal)
+                    {
+                        gameStatus.text = "TIE!";
+                        //Get Bet back
+                        playerChips += hand.bet;
+                    }
+                }
             }
-            else
-            {
-                //Player wins
-                if (playerVal > dealerVal)
-                {
-                    gameStatus.text = "WINNER!";
-                    //win back double
-                    playerChips += (playerBet * 2);
-                }
-
-                if (playerVal < dealerVal)
-                {
-                    gameStatus.text = "Loser!";
-                }
-
-                if (playerVal == dealerVal)
-                {
-                    gameStatus.text = "TIE!";
-                    //Get Bet back
-                    playerChips += playerBet;
-                }
-            }
-            //reset player bet 
-            playerBet = 0;
-
         }
 
+
+        public void Hit()
+        {
+            DealCardPlayer();
+            NextHand();
+        }
         public void DealCardPlayer()
         {
             //Hit the player with a new card
@@ -262,26 +294,24 @@ namespace Blackjack
             var x = prefabCard.transform.position.x;
             var y = prefabCard.transform.position.y;
 
-            PlayerHand.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * PlayerHand.Count, y, -1 * PlayerHand.Count), Quaternion.identity));
-            PlayerHand[PlayerHand.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
-            PlayerHand[PlayerHand.Count - 1].Face = faces[Random.Range(0, faces.Count)];
-            PlayerHand[PlayerHand.Count - 1].UpdateCardSprite();
+            currentHand.cards.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * currentHand.cards.Count, y, -1 * currentHand.cards.Count), Quaternion.identity));
+            currentHand.cards[currentHand.cards.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
+            currentHand.cards[currentHand.cards.Count - 1].Face = faces[Random.Range(0, faces.Count)];
+            currentHand.cards[currentHand.cards.Count - 1].UpdateCardSprite();
 
-            var score = GetHandValue(PlayerHand);
+            var score = GetHandValue(currentHand.cards);
             scoreText.text = string.Format("PlayerHand Value:{0} ", score);
-
 
 
             if (score == 21)
             {
                 gameStatus.text = "BLACKJACK :D";
-                CurrentState = GameState.BLACKJACK;
+                currentHand.handState = HandState.BLACKJACK;
             }
             if (score > 21)
             {
                 gameStatus.text = "BUST";
-                CurrentState = GameState.END;
-                playerBet = 0;
+                currentHand.handState = HandState.BLACKJACK;
             }
 
         }
@@ -292,20 +322,20 @@ namespace Blackjack
             var x = prefabCard.transform.position.x;
             var y = prefabCard.transform.position.y;
 
-            PlayerHand.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * PlayerHand.Count, y, -1 * PlayerHand.Count), Quaternion.identity));
-            PlayerHand[PlayerHand.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
-            PlayerHand[PlayerHand.Count - 1].Face = faces[Random.Range(0, faces.Count)];
-            PlayerHand[PlayerHand.Count - 1].ShowBack();
+            currentHand.cards.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * currentHand.cards.Count, y, -1 * currentHand.cards.Count), Quaternion.identity));
+            currentHand.cards[currentHand.cards.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
+            currentHand.cards[currentHand.cards.Count - 1].Face = faces[Random.Range(0, faces.Count)];
+            currentHand.cards[currentHand.cards.Count - 1].ShowBack();
         }
-        public void DoubleDown()
+        public void DoubleDown()// TODO: COME BACK AND FIGURE THIS SHIT OUT
         {
 
-            //Deal card to player facedown
-            DealCardDoubleDown();
-            //Remove their monies
-            ChangeBet(playerBet);
+            DealCardDoubleDown();//Deal card to player facedown
+
+
+            ChangeBet(playerBet);//Remove their monies
             //Change gamestate
-            CurrentState = GameState.DOUBLED_DOWN;
+            currentHand.handState = HandState.DOUBLED_DOWN;
 
         }
         void DealCardDealer()
@@ -331,6 +361,7 @@ namespace Blackjack
 
         void Start()
         {
+            playerChips = PLAYER_STARTING_CHIPS;
             SetupNewGame();
         }
 
@@ -342,11 +373,7 @@ namespace Blackjack
             {
                 playerBetText.text = string.Format("{0}", playerSideBet);
             }
-            else
-            {
-                playerBetText.text = string.Format("{0}", playerBet);
 
-            }
             playerChipsText.text = string.Format("{0}", playerChips);
 
         }
