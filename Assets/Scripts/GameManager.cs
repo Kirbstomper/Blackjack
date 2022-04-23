@@ -17,7 +17,7 @@ namespace Blackjack
         public Card prefabCard;
 
         public Transform dealerFaceDown;
-        public List<Card> PlayerHand = new List<Card>();
+        public List<PlayerHand> PlayerHands = new List<PlayerHand>();
         int playerChips = 500;
         int playerBet = 0;
 
@@ -26,10 +26,16 @@ namespace Blackjack
         public List<Card> DealerHand = new List<Card>();
 
 
-        public enum GameState { PLAYERTURN, BETTING, DOUBLED_DOWN, SIDEBETTING, BLACKJACK, END }
+
+
+        List<List<Card>> playerHands = new List<List<Card>>(); //Player hands will be considered in 
 
         GameState CurrentState;
         public bool canDoubleDown = false; // Can the player double down this hand?
+
+        public List<bool> canSplit = new List<bool> { false }; // Can the player split this hand?
+
+
 
 
 
@@ -95,7 +101,7 @@ namespace Blackjack
             //If game ended mid, return half chips
             if (CurrentState != GameState.END)
             {
-                playerChips += playerBet/2;
+                playerChips += playerBet / 2;
                 playerBet = 0;
             }
             //Clear player hand
@@ -155,7 +161,7 @@ namespace Blackjack
             DealCardDealer(false);
             DealCardDealer();
 
-           
+
 
             //Deal 2 Cards to the Player
             DealCardPlayer();
@@ -188,7 +194,7 @@ namespace Blackjack
         public void ChangeSideBet(int amt)
         {
             print(string.Format("Current sidebet {0}", playerSideBet));
-            if ((playerChips > 0) && (playerSideBet + amt <= (playerBet / 2)) && (playerSideBet+amt >= 0))
+            if ((playerChips > 0) && (playerSideBet + amt <= (playerBet / 2)) && (playerSideBet + amt >= 0))
             {
                 playerSideBet += amt;
                 playerChips -= amt;
