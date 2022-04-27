@@ -26,7 +26,7 @@ namespace Blackjack
         public List<Card> DealerHand = new List<Card>();
 
         GameState CurrentState;
-        int currentHandIndex = 0;
+        
         public PlayerHand currentHand;
         
     
