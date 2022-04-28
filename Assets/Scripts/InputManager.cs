@@ -14,6 +14,7 @@ namespace Blackjack
 
         public GameManager gameManager;
 
+
         public void PressStay()
         {
             if (gameManager.IsGameState(GameState.PLAYERTURN))
@@ -85,6 +86,14 @@ namespace Blackjack
             gameManager.NextHand();
         }
 
+
+        public void PressSplit()
+        {
+            if(gameManager.currentHand.canSplit && gameManager.IsGameState(GameState.PLAYERTURN) && gameManager.PlayerHands.Count<4)
+            {
+                gameManager.Split();
+            }
+        }
         void getControllerInput()
         {
             if (Gamepad.current.buttonSouth.wasPressedThisFrame)

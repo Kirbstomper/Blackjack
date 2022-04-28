@@ -26,10 +26,10 @@ namespace Blackjack
         public List<Card> DealerHand = new List<Card>();
 
         GameState CurrentState;
-        
+
         public PlayerHand currentHand;
-        
-    
+
+
 
         //UI elements
         public TextMeshProUGUI scoreText;
@@ -162,10 +162,16 @@ namespace Blackjack
             //Deal 2 Cards to the players current hand
             DealCardPlayer();
             DealCardPlayer();
+            currentHand.cards[0].Face = "4";
+            currentHand.cards[1].Face = "4"; 
 
             //Check if the player can double down
             currentHand.canDoubleDown = (GetHandValue(currentHand.cards) == 9 || GetHandValue(currentHand.cards) == 10 || GetHandValue(currentHand.cards) == 11);
             currentHand.canDoubleDown = (currentHand.canDoubleDown && ((playerChips / 2) >= playerBet));
+
+            //Check if player can split this hand
+            currentHand.canSplit = (currentHand.cards[0].Face == currentHand.cards[1].Face);
+
 
             // If the dealer shown card is an ace, we can offer a side bet
             if (DealerHand[1].Face == "A")
@@ -173,6 +179,7 @@ namespace Blackjack
                 gameStatus.text = "Side Betting Open!";
                 CurrentState = GameState.SIDEBETTING;
             }
+
 
         }
 
@@ -267,17 +274,17 @@ namespace Blackjack
                     hand.cards[2].UpdateCardSprite();
                     scoreText.text = string.Format("PlayerHand Value:{0} ", GetHandValue(hand.cards));
                 }
-                
 
-                if(hand.handState == HandState.BUST)//Handle a bust
+
+                if (hand.handState == HandState.BUST)//Handle a bust
                 {
                     gameStatus.text = "You Broke! You Lost!";
- 
+
                     continue;
                 }
                 var playerVal = GetHandValue(hand.cards); //Get the value of the hand
-                
-        
+
+
                 if (dealerVal > 21)
                 {
                     gameStatus.text = "Dealer Broke! You Win!";
@@ -314,33 +321,56 @@ namespace Blackjack
         public void Hit()
         {
             DealCardPlayer();
+            currentHand.canDoubleDown = false; // Should not be able to double down with this hand after a hit
+            currentHand.canSplit = false; //Should not be able to split this hand after a split
             NextHand();
         }
+
+        public void Split()
+        {
+            //if the player can split we create another hand first
+            PlayerHands.Add(new PlayerHand());
+            //Then we should move the card from one hand to another
+            PlayerHands[PlayerHands.IndexOf(currentHand) + 1].cards.Add(currentHand.cards[1]);
+            currentHand.cards.RemoveAt(1);
+
+            //Then we should add a card to both these hands
+            DealCardPlayer(); //Deal to current hand
+            DealCardPlayer(PlayerHands[PlayerHands.IndexOf(currentHand) + 1]); //Deal to the hand you just created
+
+            //Then we just need to check if the hand we just split to can also split
+            PlayerHands[PlayerHands.IndexOf(currentHand) + 1].canSplit = PlayerHands[PlayerHands.IndexOf(currentHand) + 1].cards[0].Face == PlayerHands[PlayerHands.IndexOf(currentHand) + 1].cards[0].Face;
+            
+        }
         public void DealCardPlayer()
+        {
+            DealCardPlayer(currentHand);
+        }
+
+        public void DealCardPlayer(PlayerHand hand)
         {
             //Hit the player with a new card
 
             var x = prefabCard.transform.position.x;
             var y = prefabCard.transform.position.y;
 
-            currentHand.cards.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * currentHand.cards.Count, y, -1 * currentHand.cards.Count), Quaternion.identity));
-            currentHand.cards[currentHand.cards.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
-            currentHand.cards[currentHand.cards.Count - 1].Face = faces[Random.Range(0, faces.Count)];
-            currentHand.cards[currentHand.cards.Count - 1].UpdateCardSprite();
+            hand.cards.Add(Instantiate(prefabCard, new Vector3(x + 0.5f * hand.cards.Count, y, -1 * hand.cards.Count), Quaternion.identity));
+            hand.cards[hand.cards.Count - 1].Suit = suits[Random.Range(0, suits.Count)];
+            hand.cards[hand.cards.Count - 1].Face = faces[Random.Range(0, faces.Count)];
+            hand.cards[hand.cards.Count - 1].UpdateCardSprite();
 
-            var score = GetHandValue(currentHand.cards);
-            
+            var score = GetHandValue(hand.cards);
+
             if (score == 21)
             {
                 gameStatus.text = "BLACKJACK :D";
-                PlayerHands[PlayerHands.IndexOf(currentHand)].handState = HandState.BLACKJACK;
+                PlayerHands[PlayerHands.IndexOf(hand)].handState = HandState.BLACKJACK;
             }
             if (score > 21)
             {
                 gameStatus.text = "BUST";
-                PlayerHands[PlayerHands.IndexOf(currentHand)].handState = HandState.BUST;
+                PlayerHands[PlayerHands.IndexOf(hand)].handState = HandState.BUST;
             }
-
         }
         public void DealCardDoubleDown()
         {
@@ -393,7 +423,7 @@ namespace Blackjack
         }
 
         void Update()
-        {
+        {            
             scoreText.text = string.Format("PlayerHand Value:{0} ", GetHandValue(currentHand.cards));
             print(CurrentState);
             if (IsGameState(GameState.SIDEBETTING))
