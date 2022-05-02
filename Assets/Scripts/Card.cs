@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class Card : MonoBehaviour
     public string Face;
     void Start()
     {
-
+        //UpdateCardSprite();
     }
 
     // Update is called once per frame
@@ -44,7 +45,7 @@ public class Card : MonoBehaviour
 
         if (handleToCheck.Status == AsyncOperationStatus.Succeeded)
         {
-            var sprite = GetComponent<SpriteRenderer>();
+            var sprite = GetComponent<Image>();
             sprite.sprite = handleToCheck.Result;
 
         }

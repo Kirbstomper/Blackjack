@@ -18,12 +18,16 @@ namespace Blackjack
 
         public Transform dealerFaceDown;
         public List<PlayerHand> PlayerHands = new List<PlayerHand>();
+        public PlayerHand[] playerHandUI;
+
+        int ind = 0;
         int playerChips;
 
         public int playerBet;
         int playerSideBet = 0;
 
         public List<Card> DealerHand = new List<Card>();
+        public LayoutGroup DealerUI;
 
         GameState CurrentState;
 
@@ -103,10 +107,12 @@ namespace Blackjack
             //Destroy all cards on the field
             foreach (PlayerHand hand in PlayerHands) //Players cards
             {
+                hand.transform.gameObject.SetActive(false);
                 foreach (Card c in hand.cards)
                 {
                     Destroy(c.gameObject);
                 }
+
             }
 
             foreach (Card c in DealerHand)//Dealers cards
@@ -116,8 +122,9 @@ namespace Blackjack
 
 
             PlayerHands.Clear();// Clear out the current hands
-            PlayerHands.Add(new PlayerHand());//Create the first player hand
+            AddHand();
             currentHand = PlayerHands[0];
+            currentHand.transform.gameObject.SetActive(true);
             DealerHand.Clear(); // Clear the dealers hand
 
             //Clear UI elements
@@ -162,8 +169,7 @@ namespace Blackjack
             //Deal 2 Cards to the players current hand
             DealCardPlayer();
             DealCardPlayer();
-            currentHand.cards[0].Face = "4";
-            currentHand.cards[1].Face = "4"; 
+            
 
             //Check if the player can double down
             currentHand.canDoubleDown = (GetHandValue(currentHand.cards) == 9 || GetHandValue(currentHand.cards) == 10 || GetHandValue(currentHand.cards) == 11);
@@ -236,7 +242,9 @@ namespace Blackjack
                 {
                     if (hand.handState == HandState.OPEN)
                     {
+                        currentHand.transform.gameObject.SetActive(false);
                         currentHand = hand;
+                        currentHand.transform.gameObject.SetActive(true);
                         return;
                     }
                 }
@@ -329,9 +337,10 @@ namespace Blackjack
         public void Split()
         {
             //if the player can split we create another hand first
-            PlayerHands.Add(new PlayerHand());
+            AddHand();
             //Then we should move the card from one hand to another
             PlayerHands[PlayerHands.IndexOf(currentHand) + 1].cards.Add(currentHand.cards[1]);
+            currentHand.cards[1].transform.SetParent(null);
             currentHand.cards.RemoveAt(1);
 
             //Then we should add a card to both these hands
@@ -340,7 +349,7 @@ namespace Blackjack
 
             //Then we just need to check if the hand we just split to can also split
             PlayerHands[PlayerHands.IndexOf(currentHand) + 1].canSplit = PlayerHands[PlayerHands.IndexOf(currentHand) + 1].cards[0].Face == PlayerHands[PlayerHands.IndexOf(currentHand) + 1].cards[0].Face;
-            
+
         }
         public void DealCardPlayer()
         {
@@ -423,7 +432,7 @@ namespace Blackjack
         }
 
         void Update()
-        {            
+        {
             scoreText.text = string.Format("PlayerHand Value:{0} ", GetHandValue(currentHand.cards));
             print(CurrentState);
             if (IsGameState(GameState.SIDEBETTING))
@@ -437,6 +446,21 @@ namespace Blackjack
 
             playerChipsText.text = string.Format("{0}", playerChips);
 
+            foreach (Card c in DealerHand)
+            {
+                c.transform.SetParent(DealerUI.transform);
+            }
+
+        }
+
+
+        void AddHand()
+        {
+            if (ind < 4)
+            {
+                PlayerHands.Add(playerHandUI[ind]);
+                ind++;
+            }
         }
     }
 }
